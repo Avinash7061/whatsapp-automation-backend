@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: whatsapp-store-backend
+    env: node
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push --accept-data-loss && npm run start
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: whatsapp-store-db
+          property: connectionString
+      - key: SHOPIFY_STORE_DOMAIN
+        sync: false
+      - key: SHOPIFY_STOREFRONT_ACCESS_TOKEN
+        sync: false
+      - key: SHOPIFY_ADMIN_ACCESS_TOKEN
+        sync: false
+      - key: SHOPIFY_WEBHOOK_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: INTERAKT_API_KEY
+        sync: false
+      
+databases:
+  - name: whatsapp-store-db
+    plan: free

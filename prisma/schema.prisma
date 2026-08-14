@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Customer {
+  id          String   @id @default(uuid())
+  phoneNumber String   @unique
+  name        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  cartSessions CartSession[]
+  orders       Order[]
+}
+
+model CartSession {
+  id          String   @id @default(uuid())
+  customer    Customer @relation(fields: [customerId], references: [id])
+  customerId  String   @unique // One active cart per customer
+  items       Json     @default("[]") // Array of { productId, variantId, quantity, title, price }
+  totalAmount Float    @default(0.0)
+  status      String   @default("ACTIVE") // ACTIVE, ABANDONED, CONVERTED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Order {
+  id                    String   @id @default(uuid())
+  customer              Customer @relation(fields: [customerId], references: [id])
+  customerId            String
+  shopifyDraftOrderId   String?  @unique
+  shopifyOrderId        String?  @unique
+  razorpayOrderId       String?  @unique
+  razorpayPaymentLinkId String?  @unique
+  status                String   @default("PENDING") // PENDING, PAID, FULFILLED, CANCELLED
+  amount                Float
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model WebhookEvent {
+  id        String   @id // The external event ID (e.g., Razorpay event.id or Shopify webhook id)
+  provider  String   // "RAZORPAY" or "SHOPIFY"
+  createdAt DateTime @default(now())
+
+  @@unique([id, provider])
+}
