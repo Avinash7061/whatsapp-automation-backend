@@ -13,7 +13,8 @@ To run this product in a live production environment, you need active accounts w
 - **Why?** The Shopify API (Admin and Storefront) is required to fetch products, create draft orders, and manage fulfillments. You cannot process live checkouts or use the API extensively on a paused or inactive store.
 
 ### 🟢 Interakt (WhatsApp BSP)
-- **Subscription Required?** Yes. Interakt charges a monthly subscription (starting around ₹799/month depending on your region).
+- **Subscription Required?** Yes. Interakt charges a monthly subscription (starting around ₹799/month depending on your region). 
+- **Purchase Link:** [View Interakt Pricing & Plans](https://www.interakt.ai/pricing)
 - **Additional Costs:** Meta (Facebook) charges per "Conversation" (a 24-hour window). You will pay for user-initiated conversations and business-initiated templates (like the shipping notification).
 - **Prerequisites:** You must have a verified Facebook Business Manager account and a dedicated phone number that is not actively used on the normal WhatsApp consumer app.
 
