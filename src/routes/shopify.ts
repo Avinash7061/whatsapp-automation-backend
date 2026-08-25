@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import { sendTemplateMessage } from '../services/interakt';
+import { sendTemplateMessage } from '../services/twilio';
 import crypto from 'crypto';
 
 const router = Router();

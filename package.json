@@ -15,11 +15,14 @@
   "dependencies": {
     "@prisma/client": "^6.0.0",
     "@shopify/shopify-api": "^14.0.0",
+    "@types/twilio": "^3.19.2",
     "axios": "^1.19.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "razorpay": "^2.9.8"
+    "openai": "^7.5.0",
+    "razorpay": "^2.9.8",
+    "twilio": "^6.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

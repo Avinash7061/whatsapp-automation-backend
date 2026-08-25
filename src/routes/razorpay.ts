@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { verifyWebhookSignature } from '../services/razorpay';
 import { completeDraftOrder } from '../services/shopifyAdmin';
-import { sendTextMessage } from '../services/interakt';
+import { sendWhatsAppMessage } from '../services/twilio';
 import { clearCart } from '../services/cart';
 import { PrismaClient } from '@prisma/client';
 
@@ -99,7 +99,7 @@ async function processRazorpayEvent(eventId: string, event: string, payload: any
          }
 
          // Notify customer
-         await sendTextMessage(
+         await sendWhatsAppMessage(
            order.customer.phoneNumber,
            `Payment received successfully! Your order has been placed and is now confirmed.`
          );
@@ -117,7 +117,7 @@ async function processRazorpayEvent(eventId: string, event: string, payload: any
        });
 
        if (order && order.status === 'PENDING') {
-         await sendTextMessage(
+         await sendWhatsAppMessage(
            order.customer.phoneNumber,
            `We noticed your recent payment attempt failed. You can try paying again using the same link or reply "checkout" to start over.`
          );
