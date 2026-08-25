@@ -1,5 +1,27 @@
 # Requirements & Launch Guide
 
+## 📊 Current Project Status
+
+### ✅ What is DONE (Completed by AI & Automation)
+- **Core Backend Architecture**: Node.js, Express, and TypeScript codebase is 100% written and finalized.
+- **Database Schema**: Prisma PostgreSQL models for `Customer`, `Order`, `CartSession`, and `WebhookEvent` are configured.
+- **E-Commerce Integrations**: Shopify Storefront API (fetching products) and Admin API (draft orders/fulfillment) logic is fully implemented.
+- **Payment Gateway**: Razorpay payment link generation and signature verification logic is complete.
+- **WhatsApp Bot Logic**: Interakt chat and template messaging functions are integrated.
+- **Enterprise Features**: Webhook idempotency, Cart Expiry (24h TTL), and failure-path error handling are built in.
+- **Infrastructure**: Code is pushed to GitHub, and the `render.yaml` blueprint has successfully created the PostgreSQL database and Web Service on Render.
+
+### ⏳ What REMAINS (Manual Setup Steps Required)
+Because these steps involve your personal passwords, credit cards, and business documents, they must be completed manually by you in your web browser:
+
+1. **Add Environment Variables to Render** (See Section 3)
+2. **Purchase Interakt "Growth" Plan & Connect WhatsApp** (See Section 1)
+3. **Connect Webhooks in Dashboards** (See Section 2)
+4. **Approve WhatsApp Templates** (See Section 3)
+5. **Complete Razorpay KYC for Live Mode** (See Section 1)
+
+---
+
 This document outlines the business subscriptions required, exact steps to configure webhooks, and the final checklist to launch the WhatsApp E-Commerce Automation product to real customers.
 
 ---
