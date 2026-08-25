@@ -14,7 +14,7 @@ const shopifyStorefrontApi = axios.create({
   },
 });
 
-export const getProducts = async (limit: number = 5) => {
+export const getShopifyProducts = async (limit: number = 50) => {
   const query = `
     {
       products(first: ${limit}) {
@@ -42,7 +42,16 @@ export const getProducts = async (limit: number = 5) => {
 
   try {
     const response = await shopifyStorefrontApi.post('', { query });
-    return response.data.data.products.edges.map((edge: any) => edge.node);
+    return response.data.data.products.edges.map((edge: any) => {
+      const node = edge.node;
+      const priceAmount = node.variants.edges[0]?.node?.price?.amount || 0;
+      return {
+        id: node.id,
+        title: node.title,
+        description: node.description,
+        price: Number(priceAmount)
+      };
+    });
   } catch (error) {
     console.error('Error fetching Shopify products:', error);
     throw error;
