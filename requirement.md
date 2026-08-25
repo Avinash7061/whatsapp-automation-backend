@@ -15,7 +15,7 @@
 Because these steps involve your personal passwords, credit cards, and business documents, they must be completed manually by you in your web browser:
 
 1. **Add Environment Variables to Render** (See Section 3)
-2. **Purchase Interakt "Growth" Plan & Connect WhatsApp** (See Section 1)
+2. **Create Twilio Account & Connect WhatsApp** (See Section 1)
 3. **Connect Webhooks in Dashboards** (See Section 2)
 4. **Approve WhatsApp Templates** (See Section 3)
 5. **Complete Razorpay KYC for Live Mode** (See Section 1)
@@ -34,11 +34,10 @@ To run this product in a live production environment, you need active accounts w
 - **Subscription Required?** Yes. You need at least the **Basic Shopify Plan**.
 - **Why?** The Shopify API (Admin and Storefront) is required to fetch products, create draft orders, and manage fulfillments. You cannot process live checkouts or use the API extensively on a paused or inactive store.
 
-### 🟢 Interakt (WhatsApp BSP)
-- **Subscription Required?** Yes. Interakt charges a monthly subscription (starting around ₹799/month depending on your region). 
-- **Purchase Link:** [View Interakt Pricing & Plans](https://www.interakt.ai/pricing)
-- **Additional Costs:** Meta (Facebook) charges per "Conversation" (a 24-hour window). You will pay for user-initiated conversations and business-initiated templates (like the shipping notification).
-- **Prerequisites:** You must have a verified Facebook Business Manager account and a dedicated phone number that is not actively used on the normal WhatsApp consumer app.
+### 🟢 Twilio (WhatsApp API)
+- **Subscription Required?** No fixed monthly fee!
+- **Costs:** Twilio operates on a Pay-As-You-Go model. You only pay a tiny markup (e.g., $0.005) per message plus Meta's standard conversation fees. This is drastically cheaper than a $300/year platform fee.
+- **Prerequisites:** You need a [Twilio Account](https://www.twilio.com/). During setup, you can use the **Twilio Sandbox for WhatsApp** for free testing. For production, you will link your verified Meta Business Manager account to Twilio.
 
 ### 🟢 Razorpay
 - **Subscription Required?** No monthly fee. 
@@ -58,13 +57,15 @@ Webhooks are how external services tell your Render server that an event happene
 **First, locate your Render URL:**
 Go to your Render Dashboard, click your web service, and copy the URL (e.g., `https://whatsapp-store-backend.onrender.com`).
 
-### Setting up Interakt Webhooks
+### Setting up Twilio Webhooks
 *Purpose: Forwards incoming WhatsApp messages from customers to your code.*
-1. Log in to the [Interakt Dashboard](https://app.interakt.ai/).
-2. Navigate to **Settings** > **Developer Setting** (or API & Webhooks).
-3. Find the **Webhook URL** field.
-4. Enter: `https://[YOUR_RENDER_URL]/webhooks/interakt`
-5. Save. Now, anytime someone texts your WhatsApp number, Interakt hits this URL.
+1. Log in to the [Twilio Console](https://console.twilio.com/).
+2. Navigate to **Messaging** > **Try it out** > **Send a WhatsApp message** (if using Sandbox) OR go to **Messaging** > **Senders** > **WhatsApp senders** (if using a live number).
+3. Click on your WhatsApp number to configure it.
+4. Look for the **"A message comes in"** webhook section.
+5. Enter your URL: `https://[YOUR_RENDER_URL]/webhooks/twilio`
+6. Make sure the HTTP method is set to **POST** and click **Save**.
+*(Note: To connect the code to Twilio, you will need to add your `TWILIO_ACCOUNT_SID` and `TWILIO_AUTH_TOKEN` from the Twilio Console homepage to your Render Environment Variables).*
 
 ### Setting up Shopify Webhooks
 *Purpose: Tells your code when you have shipped an order so it can send a WhatsApp tracking message.*
@@ -98,9 +99,9 @@ Go to your Render Dashboard, click your web service, and copy the URL (e.g., `ht
 
 Once your subscriptions and webhooks are configured, follow this final checklist to officially launch your automated store:
 
-1. **Verify Environment Variables:** Double-check that your Render dashboard contains all the correct live API keys for Shopify, Razorpay, and Interakt, and your unique Webhook Secrets.
+1. **Verify Environment Variables:** Double-check that your Render dashboard contains all the correct live API keys for Shopify, Razorpay, and your new Twilio credentials (`TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`).
 2. **Activate Razorpay Live Mode:** Switch your Razorpay dashboard from "Test Mode" to "Live Mode" and update the `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` in Render to the new live keys.
-3. **Approve WhatsApp Templates:** Go to Interakt -> Templates. Create and submit a template named `order_shipped` (Language: English). It must contain 3 variables `{{1}}`, `{{2}}`, `{{3}}` for the Carrier, Tracking Number, and Tracking URL. Wait for Meta to approve it (usually takes a few minutes to hours).
+3. **Approve WhatsApp Templates:** Go to Twilio Console -> Messaging -> Content Editor. Create and submit a WhatsApp template named `order_shipped`. It must contain variables for the Carrier, Tracking Number, and Tracking URL. Wait for Meta to approve it.
 4. **End-to-End Test:**
    - Use your personal phone to text "browse" to your WhatsApp Business number.
    - Add a product to your cart.
