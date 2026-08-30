@@ -2,14 +2,29 @@ import twilio from 'twilio';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-const twilioNumber = process.env.TWILIO_PHONE_NUMBER || '';
+/**
+ * Lazily initialize Twilio client only when valid credentials starting with 'AC' exist
+ */
+function getTwilioClient(): twilio.Twilio | null {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID?.trim();
+  const authToken = process.env.TWILIO_AUTH_TOKEN?.trim();
+
+  if (!accountSid || !authToken || !accountSid.startsWith('AC')) {
+    return null;
+  }
+
+  try {
+    return twilio(accountSid, authToken);
+  } catch (err: any) {
+    console.error('Failed to initialize Twilio client:', err?.message);
+    return null;
+  }
+}
 
 /**
  * Format phone number for Twilio's WhatsApp API
  */
 function formatWhatsAppNumber(phone: string): string {
-  // Remove all non-numeric characters except +
   let cleanPhone = phone.replace(/[^\d+]/g, '');
   if (!cleanPhone.startsWith('+')) {
     cleanPhone = '+' + cleanPhone;
@@ -25,41 +40,45 @@ function formatWhatsAppNumber(phone: string): string {
  */
 export async function sendWhatsAppMessage(toPhone: string, text: string) {
   try {
-    if (!process.env.TWILIO_ACCOUNT_SID) {
-      console.log('Skipping Twilio send (no credentials). Message:', text);
+    const client = getTwilioClient();
+    if (!client) {
+      console.warn('⚠️ Twilio is not configured yet. Make sure TWILIO_ACCOUNT_SID (starts with AC) and TWILIO_AUTH_TOKEN are set in Render Environment variables.');
+      console.log(`[Would send to ${toPhone}]:\n${text}`);
       return;
     }
     
     const formattedTo = formatWhatsAppNumber(toPhone);
+    const twilioNumber = process.env.TWILIO_PHONE_NUMBER?.trim() || '';
+    
+    if (!twilioNumber) {
+      console.warn('⚠️ TWILIO_PHONE_NUMBER is not set in Environment variables.');
+      return;
+    }
     
     await client.messages.create({
       body: text,
-      from: twilioNumber,
+      from: twilioNumber.startsWith('whatsapp:') ? twilioNumber : `whatsapp:${twilioNumber}`,
       to: formattedTo
     });
-    console.log(`Twilio: Sent message to ${formattedTo}`);
+    console.log(`Twilio: Successfully sent message to ${formattedTo}`);
   } catch (error: any) {
-    console.error('Error sending Twilio message:', error?.message);
+    console.error('Error sending Twilio message:', error?.message || error);
   }
 }
 
 /**
  * Send a WhatsApp template (e.g., for shipping confirmation)
- * Note: Twilio handles templates either via Content API or by exact string matching.
- * For simplicity in this demo, if it's an unapproved template it will just send a formatted text.
  */
 export async function sendTemplateMessage(toPhone: string, templateName: string, variables: Record<string, string>) {
   try {
     const formattedTo = formatWhatsAppNumber(toPhone);
     
-    console.log(`[Twilio] Simulating template '${templateName}' to ${formattedTo} with vars`, variables);
+    console.log(`[Twilio] Processing template '${templateName}' to ${formattedTo} with vars`, variables);
     
-    // In production with Twilio, you would use Content API (ContentSid)
-    // For now, we fallback to a standard message.
-    const message = `*Shipping Update!*\nYour order has shipped via ${variables['1']}.\nTracking: ${variables['2']}\nTrack here: ${variables['3']}`;
+    const message = `*Shipping Update!*\nYour order has shipped via ${variables['1'] || 'the carrier'}.\nTracking: ${variables['2'] || 'N/A'}\nTrack here: ${variables['3'] || 'N/A'}`;
     
     await sendWhatsAppMessage(toPhone, message);
   } catch (error: any) {
-    console.error('Error sending Twilio template:', error?.message);
+    console.error('Error sending Twilio template:', error?.message || error);
   }
 }
