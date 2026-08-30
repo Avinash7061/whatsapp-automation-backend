@@ -26,7 +26,8 @@ router.post('/', async (req: Request, res: Response) => {
     if (!verifyShopifyWebhook(bodyString, signature)) {
        console.error('Invalid Shopify Webhook Signature');
        if (process.env.SHOPIFY_WEBHOOK_SECRET) {
-           return res.status(401).send('Unauthorized');
+           res.status(401).send('Unauthorized');
+           return;
        }
     }
 
@@ -89,12 +90,14 @@ async function processShopifyEvent(webhookId: string, topic: string, payload: an
               });
 
               // Send WhatsApp template notification (assumes a template named 'order_shipped')
-              // Note: Template name and language code must match Interakt dashboard
               await sendTemplateMessage(
                   order.customer.phoneNumber,
                   'order_shipped',
-                  'en',
-                  [trackingCompany, trackingNumber, trackingUrl]
+                  {
+                    '1': trackingCompany,
+                    '2': trackingNumber,
+                    '3': trackingUrl
+                  }
               );
           }
       }

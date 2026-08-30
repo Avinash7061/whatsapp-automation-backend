@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
-import { getShopifyProducts } from './shopify';
+import { getShopifyProducts, ShopifyProductItem } from './shopify';
 
 dotenv.config();
 
@@ -14,9 +14,9 @@ export async function generateAIResponse(userMessage: string, customerPhone: str
     }
 
     // 1. Fetch live product context from Shopify
-    const products = await getShopifyProducts();
+    const products: ShopifyProductItem[] = await getShopifyProducts();
     let productContext = "Live Catalog:\n";
-    products.forEach(p => {
+    products.forEach((p: ShopifyProductItem) => {
       // Extract the ID number from the Shopify Global ID (e.g. gid://shopify/Product/12345)
       const productId = p.id.split('/').pop();
       productContext += `- ${p.title} (ID: ${productId}) - Rs ${p.price}\n`;
@@ -26,8 +26,8 @@ export async function generateAIResponse(userMessage: string, customerPhone: str
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
-        { 
-          role: 'system', 
+        {
+          role: 'system',
           content: `You are a highly persuasive, friendly, and expert Personal Shopper for our online store on WhatsApp. 
           Your goal is to provide a VIP customer service experience and guide them to the perfect purchase.
 
@@ -40,17 +40,19 @@ export async function generateAIResponse(userMessage: string, customerPhone: str
           3. **Always End with a Question (Call-to-Action):** Ask a closing question like "Would you like me to add the Blue Shirt to your cart?"
           4. **Create Urgency:** Gently remind them that stock moves fast and they should secure their item by ordering today.
           5. **Do NOT Hallucinate:** Do not invent products, colors, or prices that do not exist in the Live Catalog text above.
+          6. **Cross-Selling:** If a customer asks about a product, subtly recommend a related or complementary item from the catalog.
+          7. **Overcome Objections:** If they say it's expensive, highlight the premium quality, durability, and excellent customer service they will receive.
 
           🤖 SYSTEM COMMANDS TO TELL THE USER:
           - If they want to buy a specific item, tell them to reply EXACTLY with "cart [ProductID]" (e.g., "cart 12345").
           - To pay: Tell them to reply EXACTLY with "checkout".
           - Also remind them they can tap the "Store" icon at the top of their WhatsApp to view everything!
 
-          📱 FORMATTING: Keep replies short, punchy, conversational, and formatted for WhatsApp (use *bold* for emphasis and emojis for friendliness).` 
+          📱 FORMATTING: Keep replies short, punchy, conversational, and formatted for WhatsApp (use *bold* for emphasis and emojis for friendliness).`
         },
-        { 
-          role: 'user', 
-          content: userMessage 
+        {
+          role: 'user',
+          content: userMessage
         }
       ],
       max_tokens: 200,

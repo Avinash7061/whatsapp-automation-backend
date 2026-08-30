@@ -2,6 +2,14 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+export interface CartItem {
+  productId: string;
+  variantId: string;
+  title: string;
+  price: number;
+  quantity: number;
+}
+
 export const getOrCreateCart = async (phoneNumber: string) => {
   let customer = await prisma.customer.findUnique({
     where: { phoneNumber }
@@ -39,21 +47,31 @@ export const getOrCreateCart = async (phoneNumber: string) => {
   return cart;
 };
 
-export const addToCart = async (phoneNumber: string, product: any) => {
+export const getCart = async (phoneNumber: string) => {
+  return getOrCreateCart(phoneNumber);
+};
+
+export const addToCart = async (phoneNumber: string, product: { id: string; variantId?: string; title: string; price: number }) => {
   const cart = await getOrCreateCart(phoneNumber);
-  const items = (cart.items as any[]) || [];
+  const items: CartItem[] = ((cart.items as any[]) || []).map((i: any) => ({
+    productId: i.productId,
+    variantId: i.variantId || '',
+    title: i.title,
+    price: Number(i.price),
+    quantity: Number(i.quantity) || 1
+  }));
   
   const existingItemIndex = items.findIndex(i => i.productId === product.id);
-  const price = parseFloat(product.variants.edges[0].node.price.amount);
+  const variantId = product.variantId || '';
   
   if (existingItemIndex > -1) {
     items[existingItemIndex].quantity += 1;
   } else {
     items.push({
       productId: product.id,
-      variantId: product.variants.edges[0].node.id,
+      variantId: variantId,
       title: product.title,
-      price: price,
+      price: product.price,
       quantity: 1
     });
   }
@@ -63,7 +81,7 @@ export const addToCart = async (phoneNumber: string, product: any) => {
   const updatedCart = await prisma.cartSession.update({
     where: { id: cart.id },
     data: {
-      items,
+      items: items as any,
       totalAmount
     }
   });
