@@ -35,4 +35,6 @@ services:
       
 databases:
   - name: whatsapp-store-db
+    databaseName: whatsapp_store
+    user: whatsapp_user
     plan: free
